@@ -2,41 +2,35 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Movie, Series } from '@/types'
 
-type SearchResult = (Movie | Series) & { media_type: 'movie' | 'tv' }
+interface SearchItem {
+  id: number
+  title: string
+  overview: string
+  poster_path: string
+  vote_average: number
+  release_date: string
+  media_type: 'movie' | 'tv'
+}
 
 export default function SearchResults() {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
+  const [results, setResults] = useState<SearchItem[]>([])
   const [loading, setLoading] = useState(false)
 
   const handleSearch = async () => {
     if (!query.trim()) return
     
     setLoading(true)
-    // Simulamos una búsqueda - en un proyecto real harías la llamada a la API
     setTimeout(() => {
-      const simulatedResults: SearchResult[] = Array.from({ length: 6 }, (_, i) => ({
+      const simulatedResults: SearchItem[] = Array.from({ length: 6 }, (_, i) => ({
         id: i + 1,
         media_type: i % 2 === 0 ? 'movie' : 'tv',
-        title: i % 2 === 0 ? `Película ${query} ${i + 1}` : undefined,
-        name: i % 2 === 1 ? `Serie ${query} ${i + 1}` : undefined,
+        title: `${i % 2 === 0 ? 'Película' : 'Serie'} ${query} ${i + 1}`,
         overview: `Resultado de búsqueda para "${query}". Esta es una descripción del contenido encontrado.`,
         poster_path: `/search-${i + 1}.jpg`,
-        backdrop_path: `/backdrop-${i + 1}.jpg`,
-        release_date: i % 2 === 0 ? '2024-01-15' : undefined,
-        first_air_date: i % 2 === 1 ? '2024-01-15' : undefined,
         vote_average: 7.5 + Math.random() * 2,
-        vote_count: 1000 + Math.floor(Math.random() * 9000),
-        genre_ids: [28, 12, 878],
-        adult: false,
-        original_language: 'en',
-        original_title: i % 2 === 0 ? `Original ${query} ${i + 1}` : undefined,
-        original_name: i % 2 === 1 ? `Original ${query} ${i + 1}` : undefined,
-        popularity: 100 + Math.random() * 900,
-        video: false,
-        origin_country: i % 2 === 1 ? ['US'] : undefined,
+        release_date: '2024-01-15',
       }))
       setResults(simulatedResults)
       setLoading(false)
@@ -51,7 +45,6 @@ export default function SearchResults() {
 
   return (
     <div>
-      {/* Barra de búsqueda */}
       <div className="flex gap-4 mb-8">
         <input
           type="text"
@@ -70,7 +63,6 @@ export default function SearchResults() {
         </button>
       </div>
 
-      {/* Resultados */}
       {loading && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -94,7 +86,7 @@ export default function SearchResults() {
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-3">
                   <Image
                     src={`https://picsum.photos/300/450?random=${item.id + 200}`}
-                    alt={(item as Movie).title || (item as Series).name || 'No Title'}
+                    alt={item.title}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
@@ -107,12 +99,10 @@ export default function SearchResults() {
                   </div>
                 </div>
                 <h3 className="text-white font-medium text-sm mb-1 line-clamp-2">
-                  {(item as Movie).title || (item as Series).name}
+                  {item.title}
                 </h3>
                 <p className="text-gray-400 text-xs">
-                  {new Date(
-                    (item as Movie).release_date || (item as Series).first_air_date || ''
-                  ).getFullYear()}
+                  {new Date(item.release_date).getFullYear()}
                 </p>
               </div>
             ))}
