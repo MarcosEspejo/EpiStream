@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 border-t border-gray-800">
@@ -17,27 +19,58 @@ export default function Footer() {
             <h4 className="text-lg font-semibold text-white mb-4">Enlaces</h4>
             <ul className="space-y-2">
               <li>
-                <a href="/" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/" className="text-gray-400 hover:text-white transition-colors">
                   Inicio
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/movies" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/movies" className="text-gray-400 hover:text-white transition-colors">
                   Películas
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/series" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/series" className="text-gray-400 hover:text-white transition-colors">
                   Series
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/search" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/search" className="text-gray-400 hover:text-white transition-colors">
                   Buscar
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Información */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Información</h4>
+            <ul className="space-y-2">
+              <li>
+                <span className="text-gray-400">Datos proporcionados por</span>
+              </li>
+              <li>
+                <a 
+                  href="https://www.themoviedb.org/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  The Movie Database (TMDB)
                 </a>
               </li>
             </ul>
           </div>
+        </div>
+
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+          <p className="text-gray-400">
+            © 2025 EpiStream. Desarrollado con Next.js y desplegado en Vercel.
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}
 
           {/* Información */}
           <div>
