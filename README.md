@@ -2,6 +2,8 @@
 
 Una aplicación web moderna para explorar películas y series, construida con Next.js, React y Tailwind CSS.
 
+✅ **Desplegado en Vercel** - Acceso global disponible
+
 ## 🚀 Características
 
 - **Diseño Responsivo**: Optimizado para todos los dispositivos
