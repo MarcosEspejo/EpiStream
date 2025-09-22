@@ -28,15 +28,73 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <MovieGrid type="popular" />
+            <MovieGrid type="popular" limit={60} />
           </section>
-          
+
+          {/* Separador visual */}
+          <div className="flex justify-center my-16 animate-fade-in">
+            <div className="flex items-center space-x-4 px-8 py-4 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-white/70 font-medium">Películas Mejor Valoradas</span>
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            </div>
+          </div>
+
+          {/* Películas Mejor Valoradas */}
+          <section className="mb-20 animate-fade-in">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-yellow-200 to-red-200 bg-clip-text text-transparent mb-2">
+                  Películas Mejor Valoradas
+                </h2>
+                <p className="text-gray-400 text-lg">
+                  Las obras maestras aclamadas por la crítica
+                </p>
+              </div>
+              <div className="hidden md:flex items-center space-x-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-600 to-red-600 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🏆</span>
+                </div>
+              </div>
+            </div>
+            <MovieGrid type="top_rated" limit={60} />
+          </section>
+
+          {/* Separador visual */}
+          <div className="flex justify-center my-16 animate-fade-in">
+            <div className="flex items-center space-x-4 px-8 py-4 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-white/70 font-medium">Próximos Estrenos</span>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            </div>
+          </div>
+
+          {/* Próximos Estrenos */}
+          <section className="mb-20 animate-fade-in">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-green-200 to-blue-200 bg-clip-text text-transparent mb-2">
+                  Próximos Estrenos
+                </h2>
+                <p className="text-gray-400 text-lg">
+                  Las películas más esperadas que están por llegar
+                </p>
+              </div>
+              <div className="hidden md:flex items-center space-x-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-blue-600 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🚀</span>
+                </div>
+              </div>
+            </div>
+            <MovieGrid type="upcoming" limit={60} />
+          </section>
+
           {/* Separador visual */}
           <div className="flex justify-center my-16 animate-fade-in">
             <div className="flex items-center space-x-4 px-8 py-4 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
               <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-white/70 font-medium">Más contenido increíble</span>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              <span className="text-white/70 font-medium">Series de Televisión</span>
+              <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
             </div>
           </div>
 
@@ -57,7 +115,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <MovieGrid type="tv" />
+            <MovieGrid type="tv" limit={60} />
           </section>
 
           {/* Sección de características adicionales */}

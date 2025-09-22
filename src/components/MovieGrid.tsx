@@ -11,7 +11,7 @@ interface MovieGridProps {
   limit?: number
 }
 
-export default function MovieGrid({ type, limit = 12 }: MovieGridProps) {
+export default function MovieGrid({ type, limit = 100 }: MovieGridProps) {
   const [content, setContent] = useState<(TMDBMovie | TMDBTVShow)[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,27 +22,39 @@ export default function MovieGrid({ type, limit = 12 }: MovieGridProps) {
       setError(null)
       
       try {
-        let response
+        let allResults: (TMDBMovie | TMDBTVShow)[] = []
         
-        switch (type) {
-          case 'popular':
-            response = await tmdbService.getPopularMovies()
-            break
-          case 'top_rated':
-            response = await tmdbService.getTopRatedMovies()
-            break
-          case 'upcoming':
-            response = await tmdbService.getUpcomingMovies()
-            break
-          case 'tv':
-            response = await tmdbService.getPopularTVShows()
-            break
-          default:
-            response = await tmdbService.getPopularMovies()
+        // Obtener múltiples páginas para más contenido
+        const pagesToFetch = Math.ceil(limit / 20) // TMDB devuelve ~20 por página
+        
+        for (let page = 1; page <= pagesToFetch; page++) {
+          let response
+          
+          switch (type) {
+            case 'popular':
+              response = await tmdbService.getPopularMovies(page)
+              break
+            case 'top_rated':
+              response = await tmdbService.getTopRatedMovies(page)
+              break
+            case 'upcoming':
+              response = await tmdbService.getUpcomingMovies(page)
+              break
+            case 'tv':
+              response = await tmdbService.getPopularTVShows(page)
+              break
+            default:
+              response = await tmdbService.getPopularMovies(page)
+          }
+          
+          allResults = [...allResults, ...response.results]
+          
+          // Si ya tenemos suficiente contenido, parar
+          if (allResults.length >= limit) break
         }
         
-        // Limitar resultados si se especifica
-        const results = response.results.slice(0, limit)
+        // Limitar al número exacto solicitado
+        const results = allResults.slice(0, limit)
         setContent(results)
         
       } catch (err) {
