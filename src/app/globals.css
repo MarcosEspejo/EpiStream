@@ -3,38 +3,192 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 15, 15, 25;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    135deg,
+    rgb(var(--background-start-rgb)) 0%,
+    rgb(var(--background-end-rgb)) 100%
+  );
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Background gradient animado */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at top, rgba(120, 119, 198, 0.1) 0%, transparent 70%),
+              radial-gradient(ellipse at bottom, rgba(76, 29, 149, 0.1) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .hero-bg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(30, 27, 75, 0.9) 0%,
+    rgba(76, 29, 149, 0.8) 25%,
+    rgba(124, 58, 237, 0.7) 50%,
+    rgba(59, 130, 246, 0.6) 75%,
+    rgba(16, 185, 129, 0.5) 100%
+  );
+  position: relative;
+  overflow: hidden;
 }
 
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="grain"><stop offset="0%" stop-color="white" stop-opacity="0.03"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.8;
+  animation: grain 0.5s steps(1) infinite;
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-1%, -1%) rotate(1deg); }
+  20% { transform: translate(1%, -1%) rotate(-1deg); }
+  30% { transform: translate(-1%, 1%) rotate(0deg); }
+  40% { transform: translate(1%, 1%) rotate(1deg); }
+  50% { transform: translate(-1%, -1%) rotate(-1deg); }
+  60% { transform: translate(1%, -1%) rotate(0deg); }
+  70% { transform: translate(-1%, 1%) rotate(-1deg); }
+  80% { transform: translate(1%, 1%) rotate(1deg); }
+  90% { transform: translate(-1%, -1%) rotate(0deg); }
+}
+
+/* Efectos de tarjetas mejorados */
 .card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s;
+  z-index: 1;
+}
+
+.card-hover:hover::before {
+  left: 100%;
 }
 
 .card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px) rotateX(5deg) rotateY(2deg);
+  box-shadow: 
+    0 20px 40px rgba(124, 58, 237, 0.2),
+    0 10px 20px rgba(59, 130, 246, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(124, 58, 237, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(124, 58, 237, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.8s ease-out;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Focus states mejorados */
+button:focus,
+input:focus,
+a:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+/* Text selection personalizado */
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: white;
 }
