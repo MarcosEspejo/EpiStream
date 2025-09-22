@@ -18,6 +18,7 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -67,7 +68,32 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
     if (videoRef.current) {
       setDuration(videoRef.current.duration)
       setIsLoading(false)
+      console.log('✅ Video cargado correctamente')
     }
+  }
+
+  const handleError = (e: any) => {
+    console.error('❌ Error al cargar el video:', e)
+    setIsLoading(false)
+    setHasError(true)
+    // Intentar con el siguiente video si hay error
+    if (videoRef.current) {
+      const currentSrc = videoRef.current.currentSrc
+      const currentIndex = videoSources.findIndex(src => src === currentSrc)
+      if (currentIndex < videoSources.length - 1) {
+        const nextSrc = videoSources[currentIndex + 1]
+        videoRef.current.src = nextSrc
+        setHasError(false)
+        setIsLoading(true)
+        console.log('🔄 Intentando con:', nextSrc)
+      }
+    }
+  }
+
+  const handleCanPlay = () => {
+    setIsLoading(false)
+    setHasError(false)
+    console.log('✅ Video listo para reproducir')
   }
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,10 +132,11 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
     router.push(`/movies/${movieId}`)
   }
 
-  // URLs de ejemplo para demostración (en producción, estas vendrían de tu backend)
+  // URLs de demostración que SÍ funcionan
   const demoSources = [
-    'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
-    // En producción, aquí irían las URLs reales de tu servicio de streaming
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
   ]
 
   const videoSources = sources.length > 0 ? sources : demoSources
@@ -128,9 +155,13 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
         poster={poster}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onCanPlay={handleCanPlay}
+        onError={handleError}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onClick={togglePlay}
+        crossOrigin="anonymous"
+        preload="metadata"
       >
         {videoSources.map((src, index) => (
           <source key={index} src={src} type="video/mp4" />
@@ -138,17 +169,45 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
         Tu navegador no soporta el elemento video.
       </video>
 
+      {/* Error Overlay */}
+      {hasError && !isLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <div className="text-white text-xl mb-4">Error al cargar el video</div>
+          <div className="text-gray-400 text-center mb-6">
+            <p>Intenta refrescar la página o prueba con otro contenido.</p>
+            <p className="text-sm mt-2">Código de error: Video no disponible</p>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-white transition-colors"
+            >
+              🔄 Reintentar
+            </button>
+            <button
+              onClick={goBack}
+              className="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-lg text-white transition-colors"
+            >
+              ← Volver
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="text-white text-xl">Cargando video...</div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
+          <div className="text-white text-xl mb-2">Cargando video...</div>
+          <div className="text-gray-400 text-sm">Esto puede tomar unos segundos</div>
         </div>
       )}
 
       {/* Demo Message */}
       {videoSources === demoSources && (
-        <div className="absolute top-4 left-4 right-4 bg-yellow-600 text-black px-4 py-2 rounded-lg text-center">
-          🎬 DEMO: En producción aquí se reproducirían las películas reales
+        <div className="absolute top-4 left-4 right-4 bg-yellow-600 text-black px-4 py-2 rounded-lg text-center z-50">
+          🎬 DEMO: Videos de prueba - En producción aquí irían las películas reales con licencia
         </div>
       )}
 
