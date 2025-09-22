@@ -227,9 +227,13 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
 
       {/* Content Info */}
       <div className="absolute top-4 left-4 right-4 z-50">
-        <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3">
+        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3">
           <h2 className="text-white font-semibold text-lg">{title}</h2>
-          <p className="text-gray-300 text-sm">Streaming en EpiStream</p>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="bg-red-600 px-2 py-1 rounded text-white text-xs font-semibold">HD</span>
+            <span className="text-gray-300 text-sm">EpiStream Original</span>
+            <span className="text-green-400 text-xs">● EN VIVO</span>
+          </div>
         </div>
       </div>
 
