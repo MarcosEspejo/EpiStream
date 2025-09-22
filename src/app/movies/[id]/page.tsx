@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { tmdbService } from '@/services/tmdb'
 import type { MovieDetails, CastMember, Video } from '@/services/tmdb'
 
 export default function MovieDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const [movie, setMovie] = useState<MovieDetails | null>(null)
   const [cast, setCast] = useState<CastMember[]>([])
   const [videos, setVideos] = useState<Video[]>([])
@@ -15,6 +16,10 @@ export default function MovieDetailsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const movieId = params.id as string
+
+  const handleWatchNow = () => {
+    router.push(`/watch/movie/${movieId}`)
+  }
 
   useEffect(() => {
     const loadMovieDetails = async () => {
@@ -127,7 +132,10 @@ export default function MovieDetailsPage() {
 
             {/* Botones */}
             <div className="flex gap-4 mb-8">
-              <button className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
+              <button 
+                onClick={handleWatchNow}
+                className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+              >
                 ▶ Ver Ahora
               </button>
               <button className="bg-gray-700 hover:bg-gray-600 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">

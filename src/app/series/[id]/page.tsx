@@ -2,17 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { tmdbService } from '@/services/tmdb'
 import type { TMDBTVShow } from '@/services/tmdb'
 
 export default function SeriesDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const [series, setSeries] = useState<TMDBTVShow | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const seriesId = params.id as string
+
+  const handleWatchNow = () => {
+    router.push(`/watch/series/${seriesId}`)
+  }
 
   useEffect(() => {
     const loadSeriesDetails = async () => {
@@ -102,7 +107,10 @@ export default function SeriesDetailsPage() {
 
             {/* Botones */}
             <div className="flex gap-4 mb-8">
-              <button className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
+              <button 
+                onClick={handleWatchNow}
+                className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+              >
                 ▶ Ver Ahora
               </button>
               <button className="bg-gray-700 hover:bg-gray-600 px-8 py-3 rounded-lg font-semibold text-lg transition-colors">
