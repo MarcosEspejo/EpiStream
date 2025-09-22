@@ -32,17 +32,29 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const contentSource = type === 'movie' 
-          ? await contentService.getMovieStream(movieId)
-          : await contentService.getSeriesStream(movieId)
-        
-        if (contentSource) {
-          setCurrentSource(contentSource.url)
+        // Para proyecto personal - usar trailers oficiales cuando sea posible
+        if (type === 'movie') {
+          // Intentar obtener trailer de YouTube de TMDB
+          const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`)
+          const data = await response.json()
+          
+          const trailer = data.results?.find((video: any) => 
+            video.site === 'YouTube' && video.type === 'Trailer'
+          )
+          
+          if (trailer) {
+            // Convertir YouTube a URL de video directo (para demostraciones)
+            const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&controls=0&rel=0&showinfo=0&modestbranding=1`
+            setCurrentSource(youtubeEmbedUrl)
+            return
+          }
         }
+        
+        // Si no hay trailer, usar mensaje personalizado
+        setCurrentSource('NO_VIDEO_AVAILABLE')
       } catch (error) {
         console.error('Error loading content:', error)
-        // Fallback a fuentes demo
-        setCurrentSource('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
+        setCurrentSource('NO_VIDEO_AVAILABLE')
       }
     }
 
@@ -160,6 +172,69 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-xl">Cargando contenido...</div>
+      </div>
+    )
+  }
+
+  // Si no hay video disponible, mostrar simulación
+  if (currentSource === 'NO_VIDEO_AVAILABLE') {
+    return (
+      <div className="min-h-screen bg-black relative">
+        {/* Poster de fondo */}
+        {poster && (
+          <div className="absolute inset-0">
+            <img 
+              src={poster} 
+              alt={title}
+              className="w-full h-full object-cover opacity-30"
+            />
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+        )}
+        
+        {/* Contenido simulado */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4">{title}</h1>
+            <p className="text-xl text-gray-300 mb-8">Proyecto Personal - Demostración de Funcionalidad</p>
+            
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-8 max-w-2xl">
+              <h3 className="text-2xl font-bold mb-4 text-yellow-400">🎬 Simulación de Streaming</h3>
+              <div className="text-left space-y-4">
+                <p className="text-gray-300">
+                  <strong>✅ Funcionalidad implementada:</strong><br/>
+                  • Integración con TMDB API<br/>
+                  • Reproductor profesional<br/>
+                  • Páginas de detalles completas<br/>
+                  • Sistema de navegación<br/>
+                  • Búsqueda funcional
+                </p>
+                <p className="text-gray-300">
+                  <strong>🎯 Para contenido real necesitarías:</strong><br/>
+                  • Licencias de distribución<br/>
+                  • Servidor de streaming<br/>
+                  • Acuerdos con estudios<br/>
+                  • Sistema de pagos
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-4">
+            <button
+              onClick={goBack}
+              className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              ← Volver a Detalles
+            </button>
+            <button
+              onClick={() => window.open(`https://www.themoviedb.org/movie/${movieId}`, '_blank')}
+              className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Ver en TMDB
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
