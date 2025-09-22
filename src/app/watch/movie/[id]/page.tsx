@@ -62,10 +62,10 @@ export default function WatchMoviePage() {
     <VideoPlayer
       title={movie.title}
       movieId={parseInt(movieId)}
+      type="movie"
       poster={movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : undefined}
       sources={[
-        // En producción, aquí irían las URLs reales del video
-        // Por ahora usamos videos de demo
+        // Las fuentes se cargarán automáticamente desde el contentService
       ]}
     />
   )

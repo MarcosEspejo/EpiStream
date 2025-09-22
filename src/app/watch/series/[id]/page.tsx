@@ -62,10 +62,10 @@ export default function WatchSeriesPage() {
     <VideoPlayer
       title={series.name}
       movieId={parseInt(seriesId)}
+      type="series"
       poster={series.backdrop_path ? `https://image.tmdb.org/t/p/original${series.backdrop_path}` : undefined}
       sources={[
-        // En producción, aquí irían las URLs reales del video
-        // Por ahora usamos videos de demo
+        // Las fuentes se cargarán automáticamente desde el contentService
       ]}
     />
   )

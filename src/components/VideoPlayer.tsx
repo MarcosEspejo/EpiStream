@@ -2,15 +2,17 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { contentService } from '@/services/content'
 
 interface VideoPlayerProps {
   title: string
   movieId: number
   sources?: string[]
   poster?: string
+  type?: 'movie' | 'series'
 }
 
-export default function VideoPlayer({ title, movieId, sources = [], poster }: VideoPlayerProps) {
+export default function VideoPlayer({ title, movieId, sources = [], poster, type = 'movie' }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -19,11 +21,37 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
   const [showControls, setShowControls] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+  const [currentSource, setCurrentSource] = useState<string | null>(null)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
+
+  // Cargar fuente de contenido real
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const contentSource = type === 'movie' 
+          ? await contentService.getMovieStream(movieId)
+          : await contentService.getSeriesStream(movieId)
+        
+        if (contentSource) {
+          setCurrentSource(contentSource.url)
+        }
+      } catch (error) {
+        console.error('Error loading content:', error)
+        // Fallback a fuentes demo
+        setCurrentSource('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
+      }
+    }
+
+    if (sources.length === 0) {
+      loadContent()
+    } else {
+      setCurrentSource(sources[0])
+    }
+  }, [movieId, sources, type])
 
   // Auto-hide controls
   useEffect(() => {
@@ -76,17 +104,12 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
     console.error('❌ Error al cargar el video:', e)
     setIsLoading(false)
     setHasError(true)
-    // Intentar con el siguiente video si hay error
-    if (videoRef.current) {
-      const currentSrc = videoRef.current.currentSrc
-      const currentIndex = videoSources.findIndex(src => src === currentSrc)
-      if (currentIndex < videoSources.length - 1) {
-        const nextSrc = videoSources[currentIndex + 1]
-        videoRef.current.src = nextSrc
-        setHasError(false)
-        setIsLoading(true)
-        console.log('🔄 Intentando con:', nextSrc)
-      }
+    // En caso de error, intentar con contenido alternativo
+    if (currentSource?.includes('archive.org')) {
+      console.log('🔄 Intentando con video demo alternativo...')
+      setCurrentSource('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
+      setHasError(false)
+      setIsLoading(true)
     }
   }
 
@@ -129,17 +152,17 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
   }
 
   const goBack = () => {
-    router.push(`/movies/${movieId}`)
+    const path = type === 'movie' ? `/movies/${movieId}` : `/series/${movieId}`
+    router.push(path)
   }
 
-  // URLs de demostración que SÍ funcionan
-  const demoSources = [
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-  ]
-
-  const videoSources = sources.length > 0 ? sources : demoSources
+  if (!currentSource) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Cargando contenido...</div>
+      </div>
+    )
+  }
 
   return (
     <div 
@@ -153,6 +176,7 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
         ref={videoRef}
         className="w-full h-full object-contain"
         poster={poster}
+        src={currentSource}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onCanPlay={handleCanPlay}
@@ -163,9 +187,6 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
         crossOrigin="anonymous"
         preload="metadata"
       >
-        {videoSources.map((src, index) => (
-          <source key={index} src={src} type="video/mp4" />
-        ))}
         Tu navegador no soporta el elemento video.
       </video>
 
@@ -204,12 +225,13 @@ export default function VideoPlayer({ title, movieId, sources = [], poster }: Vi
         </div>
       )}
 
-      {/* Demo Message */}
-      {videoSources === demoSources && (
-        <div className="absolute top-4 left-4 right-4 bg-yellow-600 text-black px-4 py-2 rounded-lg text-center z-50">
-          🎬 DEMO: Videos de prueba - En producción aquí irían las películas reales con licencia
+      {/* Content Info */}
+      <div className="absolute top-4 left-4 right-4 z-50">
+        <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3">
+          <h2 className="text-white font-semibold text-lg">{title}</h2>
+          <p className="text-gray-300 text-sm">Streaming en EpiStream</p>
         </div>
-      )}
+      </div>
 
       {/* Controls Overlay */}
       <div 
