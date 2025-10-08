@@ -15,6 +15,9 @@
   "description": "Una aplicación web para explorar películas y series",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.13",
+    "@types/hls.js": "^0.13.3",
+    "framer-motion": "^12.23.16",
+    "hls.js": "^1.6.13",
     "next": "^15.5.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

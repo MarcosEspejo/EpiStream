@@ -65,7 +65,7 @@ export default function WatchMoviePage() {
       type="movie"
       poster={movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : undefined}
       sources={[
-        'NO_VIDEO_AVAILABLE' // Indicador de simulación
+        // Las fuentes se cargarán automáticamente desde el contentService
       ]}
     />
   )

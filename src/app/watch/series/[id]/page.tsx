@@ -65,7 +65,7 @@ export default function WatchSeriesPage() {
       type="series"
       poster={series.backdrop_path ? `https://image.tmdb.org/t/p/original${series.backdrop_path}` : undefined}
       sources={[
-        'NO_VIDEO_AVAILABLE' // Indicador de simulación
+        // Las fuentes se cargarán automáticamente desde el contentService
       ]}
     />
   )

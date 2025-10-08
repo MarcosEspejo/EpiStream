@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import tmdbService, { TMDBMultiSearchResult } from '@/services/tmdb'
+import { debounce } from '@/utils/debounce'
 
 export default function SearchResults() {
   const searchParams = useSearchParams()
@@ -20,6 +21,14 @@ export default function SearchResults() {
       performSearch(urlQuery)
     }
   }, [searchParams])
+
+  // Función debounced para búsqueda
+  const debouncedSearch = useCallback(
+    debounce((searchQuery: string) => {
+      performSearch(searchQuery)
+    }, 300),
+    []
+  )
 
   const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -60,14 +69,14 @@ export default function SearchResults() {
   }
 
   const handleSearch = () => {
-    performSearch(query)
+    debouncedSearch(query)
     const newUrl = `${window.location.pathname}?q=${encodeURIComponent(query)}`
     window.history.pushState({}, '', newUrl)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch()
+      performSearch(query) // Búsqueda inmediata en Enter
     }
   }
 
@@ -92,18 +101,21 @@ export default function SearchResults() {
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              debouncedSearch(e.target.value) // Búsqueda en tiempo real
+            }}
             onKeyPress={handleKeyPress}
             placeholder="Buscar películas, series..."
-            className="w-full px-6 py-4 bg-gray-800/50 border-2 border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all duration-300 pr-16"
+            className="w-full px-6 py-4 bg-gray-800/50 border-2 border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-white transition-all duration-300 pr-16"
           />
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-500 hover:to-blue-500 transition-all duration-300 disabled:opacity-50"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
             ) : (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -133,7 +145,11 @@ export default function SearchResults() {
         </div>
       ) : error && results.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-6">🔍</div>
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gray-800 flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <h3 className="text-2xl font-bold text-white mb-4">{error}</h3>
           <div className="text-gray-400">
             <p>Sugerencias:</p>
@@ -152,18 +168,18 @@ export default function SearchResults() {
               href={`/${item.media_type === 'tv' ? 'series' : 'movies'}/${item.id}-${getSlug(item)}`}
               className="group cursor-pointer block"
             >
-              <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-4 card-hover bg-gradient-to-br from-gray-800 to-gray-900">
+              <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-4 bg-gradient-to-br from-gray-800 to-gray-900 group-hover:ring-2 group-hover:ring-white/50 transition-all duration-300">
                 {item.poster_path ? (
                   <Image
                     src={tmdbService.getImageURL(item.poster_path)}
                     alt={getTitle(item)}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-cover transition-transform duration-300"
                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20 flex items-center justify-center">
-                    <span className="text-6xl opacity-20">
+                  <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center">
+                    <span className="text-6xl opacity-30">
                       {item.media_type === 'tv' ? '📺' : '🎬'}
                     </span>
                   </div>
@@ -174,14 +190,14 @@ export default function SearchResults() {
                 </div>
 
                 {item.vote_average && item.vote_average > 0 && (
-                  <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-yellow-400 px-2 py-1 rounded-lg text-sm font-bold">
-                    ⭐ {item.vote_average.toFixed(1)}
+                  <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-sm font-medium border border-gray-600">
+                    ★ {item.vote_average.toFixed(1)}
                   </div>
                 )}
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-white font-medium text-sm leading-tight line-clamp-2 group-hover:text-purple-300 transition-colors duration-200">
+                <h3 className="text-white font-medium text-sm leading-tight line-clamp-2 group-hover:text-gray-300 transition-colors">
                   {getTitle(item)}
                 </h3>
                 <p className="text-gray-400 text-xs font-medium">
@@ -193,12 +209,16 @@ export default function SearchResults() {
         </div>
       ) : !query ? (
         <div className="text-center py-16">
-          <div className="text-8xl mb-8">🎬</div>
+          <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-gray-800 flex items-center justify-center">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <h2 className="text-3xl font-bold text-white mb-4">
-            Encuentra tu próxima obsesión
+            Descubre tu próximo favorito
           </h2>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            Busca entre miles de películas y series.
+            Busca entre miles de películas y series
           </p>
           <div className="flex flex-wrap justify-center gap-3 text-sm">
             {['Avengers', 'Breaking Bad', 'Stranger Things', 'Matrix'].map((suggestion) => (
@@ -208,7 +228,7 @@ export default function SearchResults() {
                   setQuery(suggestion)
                   performSearch(suggestion)
                 }}
-                className="px-4 py-2 bg-gray-800/50 hover:bg-purple-600/20 text-gray-300 hover:text-white rounded-full border border-gray-600 hover:border-purple-500 transition-all duration-200"
+                className="px-4 py-2 bg-gray-800/50 hover:bg-white/10 text-gray-300 hover:text-white rounded-full border border-gray-600 hover:border-white/50 transition-all duration-200"
               >
                 {suggestion}
               </button>

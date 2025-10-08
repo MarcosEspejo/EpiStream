@@ -1,26 +1,43 @@
-# EpiStream 🎬
+# 🎬 EpiStream - Plataforma de Streaming "Anónimo"
 
-Una aplicación web moderna para explorar películas y series, construida con Next.js, React y Tailwind CSS.
+Una plataforma de streaming moderna y completa con soporte para películas, series y **TV en vivo (IPTV)** construida con Next.js 15, TypeScript y Tailwind CSS.
 
 ✅ **Desplegado en Vercel** - Acceso global disponible
-🚀 **Build Version:** v1.0.1
+🚀 **Build Version:** v2.0.0 - Ahora con IPTV
+📺 **Nueva Funcionalidad:** 30+ canales de TV en vivo
 
-## 🚀 Características
+## ✨ Características
 
-- **Diseño Responsivo**: Optimizado para todos los dispositivos
-- **Navegación Intuitiva**: Menú de navegación moderno con versión móvil
-- **Catálogo de Contenido**: Secciones dedicadas para películas y series
-- **Funcionalidad de Búsqueda**: Encuentra tu contenido favorito fácilmente
-- **Interfaz Moderna**: Diseñada con Tailwind CSS para una experiencia visual atractiva
-- **Performance Optimizada**: Construida con Next.js para carga rápida y SEO
+- 🎥 **Catálogo Completo**: Películas y series organizadas por categorías
+- 📺 **TV en Vivo**: 30+ canales IPTV 24/7 con múltiples categorías
+- 🔍 **Búsqueda Avanzada**: Sistema de búsqueda en tiempo real
+- 📱 **Diseño Responsivo**: Perfectamente adaptado para todos los dispositivos
+- 🎨 **Interfaz Moderna**: Diseño limpio y elegante con modo oscuro
+- ⚡ **Rendimiento Optimizado**: Carga rápida sin proxies innecesarios
+- 🔒 **Diseño "Anónimo"**: Interfaz inspirada en plataformas de streaming privadas
+- 🌐 **Streaming HLS**: Reproducción optimizada de video con HLS.js
 
-## 🛠️ Tecnologías Utilizadas
+### 📺 Canales IPTV Disponibles
 
-- **Next.js 14+** - Framework de React para aplicaciones web
-- **React 18+** - Biblioteca de JavaScript para interfaces de usuario
-- **TypeScript** - Superset tipado de JavaScript
+#### 📰 Noticias
+- CNN International, France 24, DW, RT, Euronews
+
+#### 🎬 Películas 24/7
+- Cine por género: Acción, Terror, Comedia, Drama, Marvel
+
+#### 📺 Series 24/7
+- Anime, Sci-Fi, Thriller, Retro, Star Trek
+
+#### ⚽ Deportes • 🎵 Música • 👶 Infantil • 📖 Documentales
+
+## � Tecnologías
+
+- **Next.js 15** - Framework React con App Router
+- **TypeScript** - Tipado estático para mayor robustez
 - **Tailwind CSS** - Framework de CSS utilitario
-- **Vercel** - Plataforma de despliegue
+- **HLS.js** - Reproducción de streams HLS/M3U8
+- **React Icons** - Iconografía moderna
+- **Vercel** - Plataforma de despliegue optimizada
 
 ## 📦 Instalación
 

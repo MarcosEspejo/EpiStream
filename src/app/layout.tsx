@@ -7,9 +7,9 @@ import Footer from '@/components/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'EpiStream - Películas y Series',
-  description: 'Descubre las mejores películas y series en streaming. Tu entretenimiento favorito en un solo lugar.',
-  keywords: ['películas', 'series', 'streaming', 'entretenimiento', 'cine', 'tv'],
+  title: 'Anónimo',
+  description: 'Plataforma de contenido cinematográfico de calidad.',
+  keywords: ['películas', 'series', 'streaming', 'entretenimiento', 'cine'],
 }
 
 export default function RootLayout({

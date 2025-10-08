@@ -148,38 +148,38 @@ export default function MovieGrid({ type, limit = 100 }: MovieGridProps) {
           href={`/${type === 'tv' ? 'series' : 'movies'}/${item.id}-${getSlug(item)}`}
           className="group cursor-pointer block"
         >
-          <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-4 card-hover bg-gradient-to-br from-gray-800 to-gray-900">
+          <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-gray-800 to-gray-900 group-hover:ring-2 group-hover:ring-white/50 transition-all duration-300">
             {item.poster_path ? (
               <Image
                 src={tmdbService.getImageURL(item.poster_path)}
                 alt={getTitle(item)}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                className="object-cover transition-transform duration-300"
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
                 placeholder="blur"
                 blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20 flex items-center justify-center">
-                <span className="text-6xl opacity-20">
+              <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center">
+                <span className="text-6xl opacity-30">
                   {type === 'tv' ? '📺' : '🎬'}
                 </span>
               </div>
             )}
             
             {/* Rating badge */}
-            <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-yellow-400 px-2 py-1 rounded-lg text-sm font-bold border border-yellow-400/20">
-              ⭐ {item.vote_average.toFixed(1)}
+            <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-sm font-medium border border-gray-600">
+              ★ {item.vote_average.toFixed(1)}
             </div>
 
             {/* Hover overlay with info */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
               <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <p className="text-xs text-gray-300 line-clamp-3 mb-2">
                   {item.overview || 'Sin descripción disponible'}
                 </p>
                 <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span>{tmdbService.formatRating(item.vote_average)}</span>
+                  <span>{getDate(item)}</span>
                   <span>{item.vote_count} votos</span>
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function MovieGrid({ type, limit = 100 }: MovieGridProps) {
 
           {/* Title and year */}
           <div className="space-y-1">
-            <h3 className="text-white font-medium text-sm leading-tight line-clamp-2 group-hover:text-purple-300 transition-colors duration-200">
+            <h3 className="text-white font-medium text-sm leading-tight line-clamp-2 group-hover:text-gray-300 transition-colors duration-200">
               {getTitle(item)}
             </h3>
             <p className="text-gray-400 text-xs font-medium">

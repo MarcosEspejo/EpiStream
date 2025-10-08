@@ -32,29 +32,17 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
   useEffect(() => {
     const loadContent = async () => {
       try {
-        // Para proyecto personal - usar trailers oficiales cuando sea posible
-        if (type === 'movie') {
-          // Intentar obtener trailer de YouTube de TMDB
-          const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`)
-          const data = await response.json()
-          
-          const trailer = data.results?.find((video: any) => 
-            video.site === 'YouTube' && video.type === 'Trailer'
-          )
-          
-          if (trailer) {
-            // Convertir YouTube a URL de video directo (para demostraciones)
-            const youtubeEmbedUrl = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&controls=0&rel=0&showinfo=0&modestbranding=1`
-            setCurrentSource(youtubeEmbedUrl)
-            return
-          }
-        }
+        const contentSource = type === 'movie' 
+          ? await contentService.getMovieStream(movieId)
+          : await contentService.getSeriesStream(movieId)
         
-        // Si no hay trailer, usar mensaje personalizado
-        setCurrentSource('NO_VIDEO_AVAILABLE')
+        if (contentSource) {
+          setCurrentSource(contentSource.url)
+        }
       } catch (error) {
         console.error('Error loading content:', error)
-        setCurrentSource('NO_VIDEO_AVAILABLE')
+        // Fallback a fuentes demo
+        setCurrentSource('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')
       }
     }
 
@@ -176,69 +164,6 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
     )
   }
 
-  // Si no hay video disponible, mostrar simulación
-  if (currentSource === 'NO_VIDEO_AVAILABLE') {
-    return (
-      <div className="min-h-screen bg-black relative">
-        {/* Poster de fondo */}
-        {poster && (
-          <div className="absolute inset-0">
-            <img 
-              src={poster} 
-              alt={title}
-              className="w-full h-full object-cover opacity-30"
-            />
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
-        )}
-        
-        {/* Contenido simulado */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-white">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">{title}</h1>
-            <p className="text-xl text-gray-300 mb-8">Proyecto Personal - Demostración de Funcionalidad</p>
-            
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-8 max-w-2xl">
-              <h3 className="text-2xl font-bold mb-4 text-yellow-400">🎬 Simulación de Streaming</h3>
-              <div className="text-left space-y-4">
-                <p className="text-gray-300">
-                  <strong>✅ Funcionalidad implementada:</strong><br/>
-                  • Integración con TMDB API<br/>
-                  • Reproductor profesional<br/>
-                  • Páginas de detalles completas<br/>
-                  • Sistema de navegación<br/>
-                  • Búsqueda funcional
-                </p>
-                <p className="text-gray-300">
-                  <strong>🎯 Para contenido real necesitarías:</strong><br/>
-                  • Licencias de distribución<br/>
-                  • Servidor de streaming<br/>
-                  • Acuerdos con estudios<br/>
-                  • Sistema de pagos
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-4">
-            <button
-              onClick={goBack}
-              className="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              ← Volver a Detalles
-            </button>
-            <button
-              onClick={() => window.open(`https://www.themoviedb.org/movie/${movieId}`, '_blank')}
-              className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Ver en TMDB
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div 
       ref={containerRef}
@@ -268,24 +193,28 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
       {/* Error Overlay */}
       {hasError && !isLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <div className="text-white text-xl mb-4">Error al cargar el video</div>
+          <div className="w-16 h-16 mb-4 rounded-full bg-gray-800 flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <div className="text-white text-xl mb-4">Error al cargar el contenido</div>
           <div className="text-gray-400 text-center mb-6">
-            <p>Intenta refrescar la página o prueba con otro contenido.</p>
-            <p className="text-sm mt-2">Código de error: Video no disponible</p>
+            <p>No se pudo reproducir este contenido en este momento</p>
+            <p className="text-sm mt-2">Intenta refrescar la página o selecciona otro contenido</p>
           </div>
           <div className="flex gap-4">
             <button
               onClick={() => window.location.reload()}
-              className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-white transition-colors"
+              className="bg-white hover:bg-gray-200 text-black px-6 py-2 rounded-lg transition-colors font-medium"
             >
-              🔄 Reintentar
+              Reintentar
             </button>
             <button
               onClick={goBack}
-              className="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-lg text-white transition-colors"
+              className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg text-white transition-colors font-medium"
             >
-              ← Volver
+              Volver
             </button>
           </div>
         </div>
@@ -294,8 +223,8 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
       {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
-          <div className="text-white text-xl mb-2">Cargando video...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-600 border-t-white mb-4"></div>
+          <div className="text-white text-xl mb-2">Cargando contenido...</div>
           <div className="text-gray-400 text-sm">Esto puede tomar unos segundos</div>
         </div>
       )}
@@ -303,11 +232,21 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
       {/* Content Info */}
       <div className="absolute top-4 left-4 right-4 z-50">
         <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3">
-          <h2 className="text-white font-semibold text-lg">{title}</h2>
-          <div className="flex items-center gap-3 mt-1">
-            <span className="bg-red-600 px-2 py-1 rounded text-white text-xs font-semibold">HD</span>
-            <span className="text-gray-300 text-sm">EpiStream Original</span>
-            <span className="text-green-400 text-xs">● EN VIVO</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-semibold text-lg">{title}</h2>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="bg-white/20 px-2 py-1 rounded text-white text-xs font-medium border border-white/30">HD</span>
+                <span className="text-gray-300 text-sm">Streaming</span>
+              </div>
+            </div>
+            {/* Logo Anónimo discreto */}
+            <div className="flex items-center gap-2 text-white/70">
+              <div className="w-6 h-6 border border-white/50 rounded flex items-center justify-center text-xs font-bold">
+                A
+              </div>
+              <span className="text-sm font-medium">Anónimo</span>
+            </div>
           </div>
         </div>
       </div>
@@ -329,7 +268,12 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
             </svg>
             Volver
           </button>
-          <h1 className="text-white text-xl font-bold">{title}</h1>
+          <div className="flex items-center gap-3 text-white/80">
+            <div className="w-8 h-8 border border-white/50 rounded flex items-center justify-center text-sm font-bold">
+              A
+            </div>
+            <span className="text-lg font-medium">Anónimo</span>
+          </div>
           <div></div>
         </div>
 
@@ -338,7 +282,7 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
           <div className="absolute inset-0 flex items-center justify-center">
             <button
               onClick={togglePlay}
-              className="bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all"
+              className="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition-all border border-white/30"
             >
               <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
@@ -357,7 +301,7 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
               max={duration || 0}
               value={currentTime}
               onChange={handleSeek}
-              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer progress-slider"
             />
           </div>
 
@@ -389,7 +333,7 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
                   step="0.1"
                   value={volume}
                   onChange={handleVolumeChange}
-                  className="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-20 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer volume-slider"
                 />
               </div>
 
@@ -415,21 +359,49 @@ export default function VideoPlayer({ title, movieId, sources = [], poster, type
 
       {/* Custom Slider Styles */}
       <style jsx>{`
-        .slider::-webkit-slider-thumb {
+        .progress-slider::-webkit-slider-thumb {
           appearance: none;
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #ef4444;
+          background: #ffffff;
           cursor: pointer;
+          border: 2px solid #000;
         }
-        .slider::-moz-range-thumb {
+        .progress-slider::-moz-range-thumb {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #ef4444;
+          background: #ffffff;
           cursor: pointer;
-          border: none;
+          border: 2px solid #000;
+        }
+        .volume-slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #ffffff;
+          cursor: pointer;
+          border: 2px solid #000;
+        }
+        .volume-slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #ffffff;
+          cursor: pointer;
+          border: 2px solid #000;
+        }
+        .progress-slider::-webkit-slider-track {
+          background: #374151;
+          height: 6px;
+          border-radius: 3px;
+        }
+        .volume-slider::-webkit-slider-track {
+          background: #374151;
+          height: 6px;
+          border-radius: 3px;
         }
       `}</style>
     </div>
