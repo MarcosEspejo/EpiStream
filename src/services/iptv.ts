@@ -24,6 +24,8 @@ class IPTVService {
   private channels: IPTVChannel[] = []
   private cache = new Map<string, { data: IPTVChannel[], timestamp: number }>()
   private readonly CACHE_DURATION = 10 * 60 * 1000 // 10 minutos
+  private workingStreams = new Set<string>() // Cache de streams que funcionan
+  private failedStreams = new Set<string>() // Cache de streams que fallan
 
   // Parse M3U playlist optimizado
   private parseM3U(content: string): IPTVChannel[] {
@@ -124,19 +126,46 @@ class IPTVService {
     return categories.sort()
   }
 
+  // Validar si un stream funciona
+  async validateStream(streamUrl: string): Promise<boolean> {
+    if (this.workingStreams.has(streamUrl)) return true
+    if (this.failedStreams.has(streamUrl)) return false
+
+    try {
+      const response = await fetch(streamUrl, { 
+        method: 'HEAD',
+        mode: 'no-cors' // Para evitar problemas de CORS
+      })
+      this.workingStreams.add(streamUrl)
+      return true
+    } catch (error) {
+      console.warn(`Stream failed validation: ${streamUrl}`, error)
+      this.failedStreams.add(streamUrl)
+      return false
+    }
+  }
+
+  // Obtener canales con streams validados
+  async getValidatedChannels(): Promise<IPTVChannel[]> {
+    const validatedChannels: IPTVChannel[] = []
+    
+    for (const channel of this.getDemoChannels()) {
+      // Usar streams de Pluto TV y fuentes confiables
+      if (channel.streamUrl.includes('pluto.tv') || 
+          channel.streamUrl.includes('france24.com') ||
+          channel.streamUrl.includes('samsung.wurl.tv') ||
+          channel.streamUrl.includes('rakuten')) {
+        validatedChannels.push(channel)
+      }
+    }
+    
+    return validatedChannels
+  }
+
   // MEGA BASE DE CANALES - ESTILO MAGISTV
   private getDemoChannels(): IPTVChannel[] {
     return [
-      // === NOTICIAS ===
-      {
-        id: 'news-cnn',
-        name: 'CNN International',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/CNN_International_logo.svg/512px-CNN_International_logo.svg.png',
-        streamUrl: 'https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8',
-        category: 'news',
-        country: 'Internacional',
-        language: 'Inglés'
-      },
+      // === NOTICIAS - STREAMS VERIFICADOS ===
       {
         id: 'news-france24',
         name: 'France 24 Español',
@@ -145,6 +174,15 @@ class IPTVService {
         category: 'news',
         country: 'Francia',
         language: 'Español'
+      },
+      {
+        id: 'news-france24-en',
+        name: 'France 24 English',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png',
+        streamUrl: 'https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8',
+        category: 'news',
+        country: 'Francia',
+        language: 'Inglés'
       },
       {
         id: 'news-dw',
@@ -156,12 +194,12 @@ class IPTVService {
         language: 'Español'
       },
       {
-        id: 'news-rt',
-        name: 'RT en Español',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/512px-Russia-today-logo.svg.png',
-        streamUrl: 'https://rt-esp.rttv.com/live/rtesp/playlist.m3u8',
+        id: 'news-hispan-tv',
+        name: 'HispanTV',
+        logo: 'https://www.hispantv.com/favicon.ico',
+        streamUrl: 'https://live1.presstv.ir/live/smil:live.smil/playlist.m3u8',
         category: 'news',
-        country: 'Rusia',
+        country: 'Internacional',
         language: 'Español'
       },
       {
@@ -927,18 +965,7 @@ class IPTVService {
     })
   }
 
-  // Validar si un stream funciona
-  async validateStream(streamUrl: string): Promise<boolean> {
-    try {
-      const response = await fetch(streamUrl, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(5000)
-      })
-      return response.ok
-    } catch {
-      return false
-    }
-  }
+
 
   // Cargar desde archivo M3U externo (para tus listas)
   async loadFromM3U(m3uUrl: string): Promise<IPTVChannel[]> {

@@ -25,54 +25,93 @@ const IPTVPlayer: React.FC<IPTVPlayerProps> = ({ channel, onError }) => {
     setIsLoading(true)
     setHasError(false)
 
-    // Función para cargar el stream
+    // Función para cargar el stream con mejor manejo de errores
     const loadStream = async () => {
       try {
-        // Si el navegador soporta HLS nativamente
+        // Verificar que la URL del stream sea válida
+        if (!channel.streamUrl) {
+          throw new Error('No stream URL provided')
+        }
+
+        // Timeout para el loading
+        const loadingTimeout = setTimeout(() => {
+          setHasError(true)
+          setIsLoading(false)
+          onError?.(new Error('Stream loading timeout'))
+        }, 10000)
+
+        // Si el navegador soporta HLS nativamente (Safari)
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
           video.src = channel.streamUrl
+          clearTimeout(loadingTimeout)
         } else {
-          // Cargar HLS.js dinámicamente si es necesario
+          // Cargar HLS.js dinámicamente
           const { default: Hls } = await import('hls.js')
           
           if (Hls.isSupported()) {
             const hls = new Hls({
               enableWorker: true,
               lowLatencyMode: false,
-              backBufferLength: 30,
-              maxBufferLength: 60,
-              maxMaxBufferLength: 120,
+              backBufferLength: 15,
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60,
               startLevel: -1,
               capLevelToPlayerSize: true,
-              maxLoadingDelay: 4,
-              maxBufferHole: 0.5
+              maxLoadingDelay: 8,
+              maxBufferHole: 0.5,
+              fragLoadingTimeOut: 20000,
+              manifestLoadingTimeOut: 10000,
+              levelLoadingTimeOut: 10000
             })
             
             hls.loadSource(channel.streamUrl)
             hls.attachMedia(video)
             
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              console.log('✅ Stream loaded successfully:', channel.name)
               setIsLoading(false)
-              video.play().catch(console.error)
+              clearTimeout(loadingTimeout)
+              video.play().catch(err => {
+                console.error('Autoplay failed:', err)
+                setIsPlaying(false)
+              })
             })
             
             hls.on(Hls.Events.ERROR, (_event: any, data: any) => {
-              console.error('HLS Error:', data)
-              setHasError(true)
-              setIsLoading(false)
-              onError?.(data)
+              console.error('❌ HLS Error for', channel.name, ':', data)
+              clearTimeout(loadingTimeout)
+              
+              if (data.fatal) {
+                switch (data.type) {
+                  case Hls.ErrorTypes.NETWORK_ERROR:
+                    console.log('🔄 Trying to recover network error...')
+                    hls.startLoad()
+                    break
+                  case Hls.ErrorTypes.MEDIA_ERROR:
+                    console.log('🔄 Trying to recover media error...')
+                    hls.recoverMediaError()
+                    break
+                  default:
+                    setHasError(true)
+                    setIsLoading(false)
+                    onError?.(data)
+                    break
+                }
+              }
             })
 
-            // Cleanup
+            // Cleanup function
             return () => {
+              clearTimeout(loadingTimeout)
               hls.destroy()
             }
           } else {
-            throw new Error('HLS not supported')
+            clearTimeout(loadingTimeout)
+            throw new Error('HLS not supported in this browser')
           }
         }
       } catch (error) {
-        console.error('Stream loading error:', error)
+        console.error('❌ Stream loading error for', channel.name, ':', error)
         setHasError(true)
         setIsLoading(false)
         onError?.(error)
@@ -168,17 +207,38 @@ const IPTVPlayer: React.FC<IPTVPlayerProps> = ({ channel, onError }) => {
 
   if (hasError) {
     return (
-      <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center">
-        <div className="text-center text-gray-400">
-          <div className="text-6xl mb-4">📺</div>
+      <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center">
+        <div className="text-center text-gray-300 max-w-md mx-auto p-6">
+          <div className="text-6xl mb-4">�</div>
           <h3 className="text-xl font-semibold text-white mb-2">Error de Conexión</h3>
-          <p className="text-sm">No se pudo cargar el canal {channel.name}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
-          >
-            Reintentar
-          </button>
+          <p className="text-sm mb-2">No se pudo cargar el canal:</p>
+          <p className="text-blue-300 font-medium mb-4">{channel.name}</p>
+          
+          <div className="text-xs text-gray-400 mb-6 space-y-1">
+            <p>• Verifica tu conexión a internet</p>
+            <p>• El canal podría estar inactivo</p>
+            <p>• Algunos streams tienen restricciones</p>
+          </div>
+          
+          <div className="space-y-2">
+            <button 
+              onClick={() => {
+                setHasError(false)
+                setIsLoading(true)
+                window.location.reload()
+              }}
+              className="w-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 px-4 py-2 rounded-lg transition-colors text-sm"
+            >
+              🔄 Reintentar conexión
+            </button>
+            
+            <button 
+              onClick={() => window.history.back()}
+              className="w-full bg-gray-600/20 hover:bg-gray-600/30 border border-gray-500/50 text-gray-300 px-4 py-2 rounded-lg transition-colors text-sm"
+            >
+              ← Volver a la lista
+            </button>
+          </div>
         </div>
       </div>
     )
