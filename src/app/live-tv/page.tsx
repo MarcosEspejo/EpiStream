@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Metadata } from 'next'
 import IPTVPlayer from '@/components/IPTVPlayer'
+import UniversalPlayer from '@/components/UniversalPlayer'
 import ChannelList from '@/components/ChannelList'
 import { iptvService } from '@/services/iptv'
 import type { IPTVChannel } from '@/services/iptv'
@@ -177,7 +178,7 @@ export default function LiveTVPage() {
 
                 {/* Reproductor */}
                 <div className="bg-black rounded-2xl overflow-hidden border border-white/10">
-                  <IPTVPlayer
+                  <UniversalPlayer
                     channel={selectedChannel}
                     onError={(error) => console.error('Player error:', error)}
                   />

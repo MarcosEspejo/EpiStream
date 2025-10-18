@@ -8,6 +8,8 @@ export interface IPTVChannel {
   country: string
   language?: string
   epg?: string
+  isEmbedded?: boolean // Para streams embebidos de YouTube
+  isVideo?: boolean    // Para videos MP4 directos
   tvg?: {
     id?: string
     name?: string
@@ -162,54 +164,81 @@ class IPTVService {
     return validatedChannels
   }
 
-  // MEGA BASE DE CANALES - ESTILO MAGISTV
+  // CANALES CON STREAMS EMBEBIDOS - MÁS CONFIABLES
   private getDemoChannels(): IPTVChannel[] {
     return [
-      // === NOTICIAS - STREAMS VERIFICADOS ===
+      // === NOTICIAS - STREAMS EMBEBIDOS DE YOUTUBE ===
       {
-        id: 'news-france24',
-        name: 'France 24 Español',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png',
-        streamUrl: 'https://static.france24.com/live/F24_ES_LO_HLS/live_web.m3u8',
-        category: 'news',
-        country: 'Francia',
-        language: 'Español'
-      },
-      {
-        id: 'news-france24-en',
-        name: 'France 24 English',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png',
-        streamUrl: 'https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8',
-        category: 'news',
-        country: 'Francia',
-        language: 'Inglés'
-      },
-      {
-        id: 'news-dw',
-        name: 'DW Español',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Deutsche_Welle_symbol_2012.svg/512px-Deutsche_Welle_symbol_2012.svg.png',
-        streamUrl: 'https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8',
-        category: 'news',
-        country: 'Alemania',
-        language: 'Español'
-      },
-      {
-        id: 'news-hispan-tv',
-        name: 'HispanTV',
-        logo: 'https://www.hispantv.com/favicon.ico',
-        streamUrl: 'https://live1.presstv.ir/live/smil:live.smil/playlist.m3u8',
+        id: 'news-cnn-youtube',
+        name: 'CNN en Español (YouTube)',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/CNN_International_logo.svg/512px-CNN_International_logo.svg.png',
+        streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCCwJRO9qU2KFNMHhwgXB_bw&autoplay=1',
         category: 'news',
         country: 'Internacional',
-        language: 'Español'
+        language: 'Español',
+        isEmbedded: true
       },
       {
-        id: 'news-euronews',
-        name: 'Euronews Español',
+        id: 'news-dw-youtube',
+        name: 'DW Español (YouTube)',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Deutsche_Welle_symbol_2012.svg/512px-Deutsche_Welle_symbol_2012.svg.png',
+        streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCT4Rx-BdRaWFTBSZGgvyf3g&autoplay=1',
+        category: 'news',
+        country: 'Alemania',
+        language: 'Español',
+        isEmbedded: true
+      },
+      {
+        id: 'news-rt-youtube',
+        name: 'RT en Español (YouTube)',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/512px-Russia-today-logo.svg.png',
+        streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCEIhICHOQOonjE6V0SLdrHQ&autoplay=1',
+        category: 'news',
+        country: 'Rusia',
+        language: 'Español',
+        isEmbedded: true
+      },
+      {
+        id: 'news-euronews-youtube',
+        name: 'Euronews Español (YouTube)',
         logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Euronews._2016_alternative_logo.png/512px-Euronews._2016_alternative_logo.png',
-        streamUrl: 'https://rakuten-euronews-4-es.samsung.wurl.tv/playlist.m3u8',
+        streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCODiHHK1YOaKvdtNPdBVQ0A&autoplay=1',
         category: 'news',
         country: 'Europa',
-        language: 'Español'
+        language: 'Español',
+        isEmbedded: true
+      },
+
+      // === DEMO STREAMING - CONTENIDO CONFIABLE ===
+      {
+        id: 'demo-bigbuck',
+        name: 'Demo: Big Buck Bunny',
+        logo: '/tv-placeholder.png',
+        streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        category: 'movies',
+        country: 'Demo',
+        language: 'Sin audio',
+        isVideo: true
+      },
+      {
+        id: 'demo-elephant',
+        name: 'Demo: Elephant Dream',
+        logo: '/tv-placeholder.png',
+        streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        category: 'movies',
+        country: 'Demo',
+        language: 'Sin audio',
+        isVideo: true
+      },
+      {
+        id: 'demo-sintel',
+        name: 'Demo: Sintel',
+        logo: '/tv-placeholder.png',
+        streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        category: 'movies',
+        country: 'Demo',
+        language: 'Sin audio',
+        isVideo: true
       },
 
       // === PELÍCULAS 24/7 ===

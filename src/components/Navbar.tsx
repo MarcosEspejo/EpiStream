@@ -123,6 +123,7 @@ const Navbar: React.FC = () => {
               { href: '/movies', label: 'Películas' },
               { href: '/series', label: 'Series' },
               { href: '/live-tv', label: 'TV en Vivo' },
+              { href: '/streaming-options', label: '⚙️ Opciones' },
             ].map((item) => (
               <Link 
                 key={item.href}
